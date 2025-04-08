@@ -152,7 +152,7 @@ export default async function handler(req, res) {
       if (axiosError.response && axiosError.response.status === 401) {
         console.error('API authentication error - invalid API key');
         return res.status(200).json({
-          response: "Es tut mir leid, ich habe gerade ein technisches Problem. Bitte wende dich an einen Erwachsenen.",
+          response: "Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.",
           source: 'auth_error'
         });
       }
@@ -172,7 +172,7 @@ export default async function handler(req, res) {
     
     // Different responses based on error type
     if (error.message.includes('API key')) {
-      errorResponse = "Es tut mir leid, ich habe gerade ein Problem mit meiner Verbindung. Ein Erwachsener sollte meine Einstellungen überprüfen.";
+      errorResponse = "Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.";
     } else if (error.message.includes('network')) {
       errorResponse = "Es scheint ein Netzwerkproblem zu geben. Bist du mit dem Internet verbunden?";
     }

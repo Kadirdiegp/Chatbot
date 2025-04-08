@@ -86,3 +86,4 @@ Dieses Projekt steht unter der MIT-Lizenz.
 ## Kontakt
 
 Bei Fragen oder Anregungen bitte [hier](mailto:your-email@example.com) melden.
+# Chatbot
