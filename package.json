@@ -1,0 +1,27 @@
+{
+  "name": "childsafetychatbot",
+  "version": "1.0.0",
+  "description": "A safe chatbot for children to discuss experiences and concerns",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": ["children", "safety", "chatbot", "support"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next": "^13.4.12",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.0",
+    "@mui/icons-material": "^5.14.0",
+    "react-markdown": "^8.0.7",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1"
+  }
+}
