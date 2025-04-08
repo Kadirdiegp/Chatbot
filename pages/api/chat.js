@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // DeepSeek API configuration
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-const MODEL = 'deepseek-chat';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+const MODEL = 'deepseek-chat'; // Zurück zur ursprünglichen Bezeichnung gemäß Dokumentation
 
 // Child-safe system prompt to ensure appropriate responses
 const CHILD_SAFE_SYSTEM_PROMPT = `You are KinderSchutz-Bot, a friendly and supportive assistant designed specifically for children.
