@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // DeepSeek API configuration
-const DEEPSEEK_API_URL = 'https://api.deepseek.ai/v1/chat/completions';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const MODEL = 'deepseek-chat';
 
 // Child-safe system prompt to ensure appropriate responses
@@ -45,6 +45,31 @@ function checkApiKey() {
   console.log('API-Schlüssel vorhanden:', apiKey.substring(0, 5) + '...');
   return true;
 }
+
+// Verbesserte Fehlerbehandlung für API-Anfragen
+const handleApiRequest = async (url, data, headers, signal) => {
+  try {
+    console.log('API request details:', {
+      url,
+      model: data.model,
+      messagesCount: data.messages.length,
+      headers: {
+        ...headers,
+        'Authorization': 'Bearer sk-***' // Maskierter API-Schlüssel für Logs
+      }
+    });
+    
+    return await axios.post(url, data, { headers, signal });
+  } catch (error) {
+    console.error('API request error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
 
 export default async function handler(req, res) {
   // Only allow POST method
@@ -106,7 +131,7 @@ export default async function handler(req, res) {
       }
       
       // Make request to DeepSeek API with timeout
-      const response = await axios.post(
+      const response = await handleApiRequest(
         DEEPSEEK_API_URL,
         {
           model: MODEL,
@@ -115,12 +140,10 @@ export default async function handler(req, res) {
           max_tokens: 500, // Limit token length for faster responses
         },
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
-          },
-          signal: controller.signal
-        }
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        },
+        controller.signal
       );
 
       // Clear the timeout since request completed
