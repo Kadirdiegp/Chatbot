@@ -31,11 +31,30 @@ const responseCache = new Map();
 // Timeout for API requests in milliseconds
 const API_TIMEOUT = 15000; // Increased timeout for better reliability
 
+// Debug-Funktion zum Überprüfen des API-Schlüssels (nur für Entwicklung)
+function checkApiKey() {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) {
+    console.error('API-Schlüssel fehlt vollständig');
+    return false;
+  }
+  if (apiKey.trim() === '') {
+    console.error('API-Schlüssel ist leer');
+    return false;
+  }
+  console.log('API-Schlüssel vorhanden:', apiKey.substring(0, 5) + '...');
+  return true;
+}
+
 export default async function handler(req, res) {
   // Only allow POST method
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Debug: API-Schlüssel überprüfen
+  const apiKeyValid = checkApiKey();
+  console.log('API-Schlüssel gültig:', apiKeyValid);
 
   try {
     const { message, messageHistory } = req.body;
