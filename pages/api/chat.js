@@ -59,7 +59,47 @@ const handleApiRequest = async (url, data, headers, signal) => {
       }
     });
     
-    return await axios.post(url, data, { headers, signal });
+    // Erhöhte Timeouts und Retries für bessere Zuverlässigkeit
+    const maxRetries = 2;
+    let retryCount = 0;
+    let lastError = null;
+    
+    while (retryCount <= maxRetries) {
+      try {
+        // Füge zusätzliche Optionen für bessere Zuverlässigkeit hinzu
+        const options = {
+          headers,
+          signal,
+          timeout: 20000, // Erhöhtes Timeout auf 20 Sekunden
+          maxContentLength: 10 * 1024 * 1024, // 10 MB
+          maxBodyLength: 10 * 1024 * 1024, // 10 MB
+        };
+        
+        return await axios.post(url, data, options);
+      } catch (error) {
+        lastError = error;
+        
+        // Nur bestimmte Fehler wiederholen (Netzwerkfehler, Timeouts, 5xx-Fehler)
+        const shouldRetry = 
+          !error.response || // Netzwerkfehler
+          error.code === 'ECONNABORTED' || // Timeout
+          (error.response && error.response.status >= 500); // 5xx-Fehler
+        
+        if (shouldRetry && retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Wiederholungsversuch ${retryCount}/${maxRetries} nach Fehler:`, error.message);
+          
+          // Exponentielles Backoff: 1s, 2s, 4s, ...
+          const delay = 1000 * Math.pow(2, retryCount - 1);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        throw error;
+      }
+    }
+    
+    throw lastError;
   } catch (error) {
     // Detaillierte Fehlerprotokollierung
     const errorDetails = {

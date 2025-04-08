@@ -253,6 +253,11 @@ export const generateBotResponse = async (userInput, messageHistory) => {
       return 'Es tut mir leid, der Server hat ein Problem. Ein Erwachsener sollte die Serverlogs überprüfen.';
     }
     
+    // Spezifische Fehlerbehandlung für Gateway-Fehler
+    if (error.message.includes('502')) {
+      return 'Es tut mir leid, es gibt ein Problem mit der Verbindung zum API-Server. Dies könnte ein vorübergehendes Problem sein. Bitte versuche es in einigen Minuten erneut.';
+    }
+    
     // Fallback responses in case of API failure
     const fallbackResponses = [
       'Entschuldige, ich habe gerade ein Problem. Kannst du das bitte noch einmal sagen?',
