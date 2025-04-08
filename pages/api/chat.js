@@ -61,12 +61,29 @@ const handleApiRequest = async (url, data, headers, signal) => {
     
     return await axios.post(url, data, { headers, signal });
   } catch (error) {
-    console.error('API request error details:', {
+    // Detaillierte Fehlerprotokollierung
+    const errorDetails = {
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
       message: error.message
-    });
+    };
+    
+    console.error('API request error details:', errorDetails);
+    
+    // Spezifische Fehlerbehandlung für Authentifizierungsprobleme
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.error('API-Authentifizierungsfehler: Ungültiger API-Schlüssel oder fehlende Berechtigungen');
+      throw new Error('API-Authentifizierungsfehler: Bitte überprüfen Sie den API-Schlüssel');
+    }
+    
+    // Spezifische Fehlerbehandlung für Modellprobleme
+    if (error.response?.data?.error?.type === 'invalid_request_error' && 
+        error.response?.data?.error?.message?.includes('model')) {
+      console.error('API-Modellfehler: Das angeforderte Modell ist möglicherweise nicht verfügbar');
+      throw new Error('API-Modellfehler: Bitte überprüfen Sie den Modellnamen');
+    }
+    
     throw error;
   }
 };
@@ -202,28 +219,26 @@ export default async function handler(req, res) {
       throw axiosError; // Re-throw to be caught by outer catch
     }
   } catch (error) {
-    console.error('Error calling DeepSeek API:', error.response?.data || error.message);
+    // Clear timeout to prevent memory leaks
+    clearTimeout(timeoutId);
     
-    let errorResponse = "Es tut mir leid, ich habe gerade ein technisches Problem. Kannst du es in ein paar Minuten noch einmal versuchen?";
+    console.error('Error in chat API:', error.message);
     
-    // Add detailed error info for debugging in the console
-    if (error.response) {
-      console.error('API error status:', error.response.status);
-      console.error('API error data:', error.response.data);
+    // Provide a user-friendly error message
+    let errorMessage = 'Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.';
+    
+    // Spezifische Fehlermeldungen für verschiedene Fehlertypen
+    if (error.message.includes('API-Authentifizierungsfehler')) {
+      errorMessage = 'Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Der API-Schlüssel scheint ungültig zu sein oder fehlt. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.';
+    } else if (error.message.includes('API-Modellfehler')) {
+      errorMessage = 'Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Das verwendete Modell scheint nicht verfügbar zu sein. Ein Erwachsener sollte die Konfiguration überprüfen.';
+    } else if (error.message.includes('timeout')) {
+      errorMessage = 'Es tut mir leid, ich brauche gerade zu lange, um zu antworten. Bitte versuche es später noch einmal.';
+    } else if (error.message.includes('Network Error')) {
+      errorMessage = 'Es tut mir leid, ich habe ein Problem mit meiner Internetverbindung. Bitte überprüfe deine Verbindung und versuche es später noch einmal.';
     }
     
-    // Different responses based on error type
-    if (error.message.includes('API key')) {
-      errorResponse = "Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.";
-    } else if (error.message.includes('network')) {
-      errorResponse = "Es scheint ein Netzwerkproblem zu geben. Bist du mit dem Internet verbunden?";
-    }
-    
-    // Provide a user-friendly error response
-    return res.status(200).json({
-      response: errorResponse,
-      source: 'error'
-    });
+    return res.status(500).json({ error: errorMessage });
   }
 }
 
