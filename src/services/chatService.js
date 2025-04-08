@@ -161,6 +161,7 @@ export const generateBotResponse = async (userInput, messageHistory) => {
     // In a real application, this could trigger a notification to moderators or support staff
     console.log('Concerning content detected in conversation');
     
+    // Wichtig: Sofort die Sicherheitsnachricht zurückgeben, ohne API-Anfrage zu stellen
     return generateSafetyResourcesMessage();
   }
   

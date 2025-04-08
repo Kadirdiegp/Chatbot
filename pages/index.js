@@ -249,14 +249,14 @@ export default function Home() {
       console.error('Error in handleSendMessage:', error);
       setError('Es gab ein Problem mit der Verbindung. Bitte versuche es später erneut.');
       
-      // Add an error message from the bot
+      // Füge eine benutzerfreundliche Fehlernachricht als Bot-Antwort hinzu
       const errorMessage = {
         id: Date.now().toString(),
         sender: 'bot',
-        text: 'Es tut mir leid, ich habe gerade ein technisches Problem. Kannst du es in ein paar Minuten noch einmal versuchen?',
-        isRead: false,
+        text: 'Entschuldige, ich habe gerade ein technisches Problem. Kannst du deine Frage vielleicht anders stellen oder später noch einmal versuchen?',
         isError: true
       };
+      
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       // Reset UI state
