@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // DeepSeek API configuration
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_API_URL = 'https://api.deepseek.ai/v1/chat/completions';
 const MODEL = 'deepseek-chat';
 
 // Child-safe system prompt to ensure appropriate responses
