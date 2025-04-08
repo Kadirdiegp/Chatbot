@@ -196,6 +196,17 @@ export const generateBotResponse = async (userInput, messageHistory) => {
       redirect: 'follow',
     }).then(response => {
       if (!response.ok) {
+        // Verbesserte Fehlerbehandlung für verschiedene HTTP-Statuscodes
+        if (response.status === 500) {
+          return response.json().then(errorData => {
+            console.error('Server error details:', errorData);
+            throw new Error(`Server-Fehler: ${errorData.error || 'Unbekannter Fehler'}`);
+          }).catch(jsonError => {
+            // Falls die Antwort kein gültiges JSON ist
+            console.error('Fehler beim Parsen der Fehlerantwort:', jsonError);
+            throw new Error(`HTTP error! status: ${response.status} - Serverfehler`);
+          });
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
@@ -224,6 +235,22 @@ export const generateBotResponse = async (userInput, messageHistory) => {
     
     if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
       return 'Es scheint ein Problem mit der Internetverbindung zu geben. Bitte prüfe deine Verbindung und versuche es noch einmal.';
+    }
+    
+    // Spezifische Fehlerbehandlung für API-Schlüssel-Probleme
+    if (error.message.includes('API-Schlüssel') || error.message.includes('API key') || 
+        error.message.includes('Authentifizierungsfehler')) {
+      return 'Es tut mir leid, ich habe ein Problem mit meiner API-Verbindung. Ein Erwachsener sollte den API-Schlüssel in den Umgebungsvariablen überprüfen.';
+    }
+    
+    // Spezifische Fehlerbehandlung für Modellprobleme
+    if (error.message.includes('Modellfehler') || error.message.includes('model')) {
+      return 'Es tut mir leid, ich habe ein Problem mit meinem Sprachmodell. Ein Erwachsener sollte die Konfiguration überprüfen.';
+    }
+    
+    // Spezifische Fehlerbehandlung für Server-Fehler
+    if (error.message.includes('Server-Fehler') || error.message.includes('500')) {
+      return 'Es tut mir leid, der Server hat ein Problem. Ein Erwachsener sollte die Serverlogs überprüfen.';
     }
     
     // Fallback responses in case of API failure
